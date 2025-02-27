@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>I Am Invincible! Pushup Logger</title>
+  <style>
+    /* Boris-approved styling for comedic effect */
+    body {
+      background-color: #000000;
+      color: #00FF00;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #00FFFF;
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      font-size: 1.2em;
+      color: #FFA500;
+      margin-bottom: 20px;
+    }
+    input[type="number"] {
+      width: 120px;
+      padding: 5px;
+      margin-right: 10px;
+      font-size: 1em;
+      background-color: #333333;
+      color: #00FF00;
+      border: 1px solid #00FF00;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 1em;
+      background-color: #444444;
+      color: #00FF00;
+      border: 2px solid #00FF00;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #00FF00;
+      color: #000000;
+    }
+    .stats {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #222222;
+      border: 2px dashed #00FF00;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .history {
+      margin-top: 20px;
+      background-color: #111111;
+      border: 2px dashed #FFA500;
+      border-radius: 4px;
+      padding: 10px;
+      max-width: 500px;
+    }
+    .history ul {
+      padding: 0;
+    }
+    .history li {
+      list-style-type: none;
+      margin: 5px 0;
+      color: #00FFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .list-item-date {
+      margin-right: 10px;
+    }
+    .edit-button {
+      margin-left: 10px;
+      background-color: #444444;
+      color: #FFA500;
+      border: 1px dashed #FFA500;
+    }
+    .edit-button:hover {
+      background-color: #FFA500;
+      color: #000000;
+    }
+    .footer-note {
+      margin-top: 30px;
+      font-size: 0.85em;
+      color: #aaaaaa;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>I Am Invincible! Pushup Logger</h1>
+  <div class="subtitle">
+    Now with the power to fix your mistakes, comrade! The glorious Edit button awaits.
+  </div>
+
+  <!-- Input field and button -->
+  <div>
+    <input type="number" id="pushupsInput" placeholder="Enter # of pushups" />
+    <button id="logButton">Log Them!</button>
+  </div>
+
+  <!-- Statistics display -->
+  <div class="stats">
+    <p><strong>Today's Pushup Total:</strong> <span id="todayTotal">0</span></p>
+    <p><strong>Current Streak:</strong> <span id="currentStreak">0</span> days</p>
+  </div>
+
+  <!-- History of past days -->
+  <div class="history">
+    <h2>History</h2>
+    <ul id="historyList">
+      <!-- Past days will appear here dynamically -->
+    </ul>
+  </div>
+
+  <div class="footer-note">
+    <em>*Disclaimer:</em> Edits are permitted, but frequent tampering with historical data might irritate the KGB. 
+  </div>
+
+  <script>
+    // =========================================================
+    //    BORIS-INSPIRED PUSHUP LOGGER WITH EDIT FEATURE
+    // =========================================================
+
+    const logButton = document.getElementById('logButton');
+    const pushupsInput = document.getElementById('pushupsInput');
+    const todayTotalEl = document.getElementById('todayTotal');
+    const currentStreakEl = document.getElementById('currentStreak');
+    const historyList = document.getElementById('historyList');
+
+    // Load existing data from localStorage (if any)
+    let pushupData = JSON.parse(localStorage.getItem('pushupData')) || [];
+
+    // Event listener for logging pushups
+    logButton.addEventListener('click', () => {
+      const pushups = parseInt(pushupsInput.value, 10);
+
+      // Sanity check
+      if (isNaN(pushups) || pushups <= 0) {
+        alert("Enter a positive number, comrade! We need real pushups here!");
+        return;
+      }
+
+      // Add pushups to today's total
+      logPushups(pushups);
+
+      // Clear input
+      pushupsInput.value = '';
+    });
+
+    // Main function to update pushups for today
+    function logPushups(pushups) {
+      const today = getTodayString();
+      let todayEntry = pushupData.find(entry => entry.date === today);
+
+      if (todayEntry) {
+        todayEntry.totalPushups += pushups;
+      } else {
+        todayEntry = { date: today, totalPushups: pushups };
+        pushupData.push(todayEntry);
+      }
+
+      // Save to localStorage
+      saveData();
+      updateUI();
+    }
+
+    // Function to update the UI
+    function updateUI() {
+      // Today's total
+      const today = getTodayString();
+      const todayEntry = pushupData.find(entry => entry.date === today);
+      const todayTotal = todayEntry ? todayEntry.totalPushups : 0;
+      todayTotalEl.textContent = todayTotal;
+
+      // Current streak
+      const streak = calculateStreak();
+      currentStreakEl.textContent = streak;
+
+      // Update history
+      updateHistoryList();
+    }
+
+    // Display the history in descending order, 
+    // now with an Edit button for each day
+    function updateHistoryList() {
+      const sortedData = [...pushupData].sort((a, b) => new Date(b.date) - new Date(a.date));
+      historyList.innerHTML = '';
+
+      sortedData.forEach(entry => {
+        const listItem = document.createElement('li');
+
+        // A container to hold date + pushup info
+        const textSpan = document.createElement('span');
+        textSpan.classList.add('list-item-date');
+        textSpan.textContent = `${entry.date}: ${entry.totalPushups} pushups`;
+
+        // A button for editing
+        const editBtn = document.createElement('button');
+        editBtn.classList.add('edit-button');
+        editBtn.textContent = "Edit";
+
+        // On click, prompt user to enter new total
+        editBtn.addEventListener('click', () => {
+          const newTotalStr = prompt(`Enter new total for ${entry.date}:`, entry.totalPushups);
+          if (newTotalStr !== null) {
+            const newTotal = parseInt(newTotalStr, 10);
+            if (!isNaN(newTotal) && newTotal >= 0) {
+              entry.totalPushups = newTotal;
+              saveData();
+              updateUI();
+            } else {
+              alert("Invalid input. Please enter a non-negative number.");
+            }
+          }
+        });
+
+        listItem.appendChild(textSpan);
+        listItem.appendChild(editBtn);
+        historyList.appendChild(listItem);
+      });
+    }
+
+    // Calculate the streak (consecutive days)
+    function calculateStreak() {
+      const sortedData = [...pushupData].sort((a, b) => new Date(a.date) - new Date(b.date));
+      let streak = 0;
+      let prevDate = null;
+
+      for (let i = sortedData.length - 1; i >= 0; i--) {
+        const currentEntry = sortedData[i];
+        if (currentEntry.totalPushups > 0) {
+          if (!prevDate) {
+            streak++;
+            prevDate = new Date(currentEntry.date);
+          } else {
+            const currentDate = new Date(currentEntry.date);
+            const dayDifference = (prevDate - currentDate) / (1000 * 60 * 60 * 24);
+            // If dayDifference is exactly 1, continue streak
+            if (dayDifference === 1) {
+              streak++;
+              prevDate = currentDate;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+      return streak;
+    }
+
+    // Return today's date as YYYY-MM-DD
+    function getTodayString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Save data to localStorage
+    function saveData() {
+      localStorage.setItem('pushupData', JSON.stringify(pushupData));
+    }
+
+    // Initialize UI on page load
+    updateUI();
+
+    // Just for show: cackle once
+    console.log("Boris mode activated again: 'I AM INVINCIBLE... but also correctable!'");
+  </script>
+
+</body>
+</html>
