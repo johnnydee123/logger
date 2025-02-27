@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Invincible Pushup Logger with Firebase</title>
+  <meta charset="UTF-8">
+  <title>Pushup Logger - Firebase Modules</title>
   <style>
-    /* Over-the-top comedic styling reminiscent of our flamboyant friend */
+    /* Boris-inspired comedic style (optional) */
     body {
       background-color: #000;
-      color: #00FF00;
+      color: #0f0;
       font-family: "Comic Sans MS", cursive, sans-serif;
       margin: 20px;
     }
     h1 {
-      color: #00FFFF;
+      color: #0ff;
       font-size: 2em;
       margin-bottom: 10px;
     }
     h2 {
-      color: #FFA500;
+      color: #ffa500;
       margin-top: 20px;
     }
     .auth-container, .logger-container {
       background-color: #111;
-      border: 2px dashed #00FF00;
+      border: 2px dashed #0f0;
       padding: 15px;
       border-radius: 6px;
       max-width: 400px;
       margin-bottom: 20px;
     }
     .logger-container {
-      display: none; /* hidden until user is logged in */
+      display: none; /* Hidden until logged in */
     }
     label {
       display: block;
@@ -40,8 +40,8 @@
       margin-top: 5px;
       padding: 5px;
       background-color: #333;
-      color: #00FF00;
-      border: 1px solid #00FF00;
+      color: #0f0;
+      border: 1px solid #0f0;
       border-radius: 4px;
     }
     button {
@@ -49,18 +49,18 @@
       padding: 8px;
       cursor: pointer;
       background-color: #444;
-      color: #00FF00;
-      border: 2px solid #00FF00;
+      color: #0f0;
+      border: 2px solid #0f0;
       border-radius: 4px;
     }
     button:hover {
-      background-color: #00FF00;
+      background-color: #0f0;
       color: #000;
     }
     .stats {
       margin-top: 20px;
       background-color: #222;
-      border: 2px dashed #00FF00;
+      border: 2px dashed #0f0;
       border-radius: 4px;
       padding: 10px;
       width: fit-content;
@@ -68,7 +68,7 @@
     .history {
       margin-top: 20px;
       background-color: #111;
-      border: 2px dashed #FFA500;
+      border: 2px dashed #ffa500;
       border-radius: 4px;
       padding: 10px;
       max-width: 500px;
@@ -78,7 +78,7 @@
     }
     .history li {
       list-style: none;
-      color: #00FFFF;
+      color: #0ff;
       margin: 5px 0;
       display: flex;
       justify-content: space-between;
@@ -86,21 +86,25 @@
     }
     .edit-btn {
       background-color: #444;
-      color: #FFA500;
-      border: 1px dashed #FFA500;
+      color: #ffa500;
+      border: 1px dashed #ffa500;
       margin-left: 10px;
       cursor: pointer;
       border-radius: 4px;
     }
     .edit-btn:hover {
-      background-color: #FFA500;
+      background-color: #ffa500;
       color: #000;
     }
     .footer-note {
       margin-top: 30px;
       font-size: 0.85em;
-      color: #aaaaaa;
+      color: #aaa;
       max-width: 600px;
+    }
+    #authMessage {
+      color: red;
+      min-height: 20px;
     }
   </style>
 </head>
@@ -108,37 +112,36 @@
 
   <h1>I Am Invincible! Pushup Logger</h1>
 
-  <!-- AUTH CONTAINER (login/sign up) -->
+  <!-- AUTH SECTION -->
   <div class="auth-container" id="authContainer">
     <h2>Log In or Sign Up</h2>
-    <p id="authMessage" style="color: red;"></p>
-    <label>Email:
+    <div id="authMessage"></div>
+    <label>
+      Email:
       <input type="email" id="emailInput" placeholder="Enter email" />
     </label>
-    <label>Password:
+    <label>
+      Password:
       <input type="password" id="passwordInput" placeholder="Enter password" />
     </label>
     <button id="loginBtn">Log In</button>
     <button id="signupBtn">Sign Up</button>
   </div>
 
-  <!-- LOGGER CONTAINER (once logged in) -->
+  <!-- LOGGER SECTION -->
   <div class="logger-container" id="loggerContainer">
     <h2>Pushup Logger</h2>
-    <!-- Input field and button -->
     <div>
       <input type="number" id="pushupsInput" placeholder="Enter # of pushups" />
       <button id="logButton">Log Them!</button>
       <button id="logoutBtn" style="float: right;">Log Out</button>
     </div>
 
-    <!-- Statistics display -->
     <div class="stats">
       <p><strong>Today's Pushup Total:</strong> <span id="todayTotal">0</span></p>
       <p><strong>Current Streak:</strong> <span id="currentStreak">0</span> days</p>
     </div>
 
-    <!-- History of past days -->
     <div class="history">
       <h2>History</h2>
       <ul id="historyList"></ul>
@@ -146,23 +149,39 @@
   </div>
 
   <div class="footer-note">
-    <em>*Note:</em> This page uses Firebase for user auth & Firestore for data storage.  
-    Use the same login on multiple devices to see your pushup logs **magically sync**.  
+    <em>*Note:</em> Using Firebase modules for a simple app. Use the same account on multiple devices for real-time sync. 
     <br><br>
-    "I am invincible!" – Boris, probably
+    “I am invincible!” – Boris, probably
   </div>
-  import { initializeApp } from "firebase/app";
-  import { getAnalytics } from "firebase/analytics";
-  <!-- Firebase SDKs -->
-  <!-- (Check for the latest versions at https://firebase.google.com/docs/web/setup) -->
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
 
-  <script>
-    // =========================
-    //     FIREBASE CONFIG
-    // =========================
+  <!-- 
+    COPY AND PASTE YOUR PROVIDED SCRIPTS
+    (PLUS FIREBASE AUTH & FIRESTORE IMPORTS)
+    AT THE BOTTOM OF <body> (HERE),
+    BEFORE USING ANY FIREBASE SERVICES
+  -->
+
+  <script type="module">
+    // 1) Import the functions from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    // 2) Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCJ9OylLLLuD4kRDwO6NG6ynERiEHkdHtE",
       authDomain: "pushuplogger-c06ff.firebaseapp.com",
@@ -173,14 +192,15 @@
       measurementId: "G-8FYG2MF16G"
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // 3) Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
 
-    // =========================
-    //   HTML ELEMENT REFERENCES
-    // =========================
+    // 4) Get Auth and Firestore references
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ================ Element References =================
     const authContainer = document.getElementById('authContainer');
     const loggerContainer = document.getElementById('loggerContainer');
     const authMessage = document.getElementById('authMessage');
@@ -198,101 +218,94 @@
     const currentStreakEl = document.getElementById('currentStreak');
     const historyList = document.getElementById('historyList');
 
-    // We'll keep an in-memory array of pushup data
-    // Each entry: { date: "YYYY-MM-DD", totalPushups: number }
+    // In-memory array of pushup data: { date, totalPushups }
     let pushupData = [];
 
-    // =========================
-    //     EVENT LISTENERS
-    // =========================
+    // ================ Authentication Logic =================
 
-    // Sign up
+    // Sign Up
     signupBtn.addEventListener('click', async () => {
       clearAuthMessage();
       const email = emailInput.value;
       const password = passwordInput.value;
+
       try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        // After successful sign up, user is auto-logged in
+        await createUserWithEmailAndPassword(auth, email, password);
+        // After success, user is automatically logged in
       } catch (error) {
         setAuthMessage(error.message);
       }
     });
 
-    // Log in
+    // Log In
     loginBtn.addEventListener('click', async () => {
       clearAuthMessage();
       const email = emailInput.value;
       const password = passwordInput.value;
+
       try {
-        await auth.signInWithEmailAndPassword(email, password);
+        await signInWithEmailAndPassword(auth, email, password);
       } catch (error) {
         setAuthMessage(error.message);
       }
     });
 
-    // Log out
+    // Log Out
     logoutBtn.addEventListener('click', async () => {
-      await auth.signOut();
+      await signOut(auth);
     });
 
-    // Log pushups
+    // React to Auth State Changes
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User is logged in
+        authContainer.style.display = 'none';
+        loggerContainer.style.display = 'block';
+        // Load pushup data
+        await loadPushupData();
+        updateUI();
+      } else {
+        // User is logged out
+        authContainer.style.display = 'block';
+        loggerContainer.style.display = 'none';
+        pushupData = [];
+      }
+    });
+
+    // ================ Pushup Logger Functions =================
+
+    // Load user's pushup data from Firestore
+    async function loadPushupData() {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const pushupsCollection = collection(db, 'users', user.uid, 'pushups');
+      const snapshot = await getDocs(pushupsCollection);
+
+      pushupData = snapshot.docs.map(docSnap => ({
+        date: docSnap.id,
+        totalPushups: docSnap.data().totalPushups
+      }));
+    }
+
+    // Log new pushups for today
     logButton.addEventListener('click', async () => {
       const pushups = parseInt(pushupsInput.value, 10);
       if (isNaN(pushups) || pushups <= 0) {
-        alert("Please enter a valid positive number!");
+        alert("Please enter a valid number of pushups!");
         return;
       }
       await logPushups(pushups);
       pushupsInput.value = '';
     });
 
-    // Listen for Auth Changes
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        // User is logged in
-        authContainer.style.display = 'none';
-        loggerContainer.style.display = 'block';
-
-        // Load their pushup data from Firestore
-        await loadPushupData();
-        updateUI();
-      } else {
-        // Logged out
-        authContainer.style.display = 'block';
-        loggerContainer.style.display = 'none';
-        pushupData = []; // clear local array
-      }
-    });
-
-    // =========================
-    //         FUNCTIONS
-    // =========================
-
-    // 1) Load user's pushup data from Firestore
-    async function loadPushupData() {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const snapshot = await db
-        .collection('users')
-        .doc(user.uid)
-        .collection('pushups')
-        .get();
-
-      pushupData = snapshot.docs.map(doc => ({
-        date: doc.id, // using doc ID as date
-        totalPushups: doc.data().totalPushups
-      }));
-    }
-
-    // 2) Log pushups for "today"
     async function logPushups(pushups) {
       const user = auth.currentUser;
       if (!user) return;
 
       const today = getTodayString();
-      let todayEntry = pushupData.find(entry => entry.date === today);
+      let todayEntry = pushupData.find(e => e.date === today);
+
       if (todayEntry) {
         todayEntry.totalPushups += pushups;
       } else {
@@ -300,46 +313,34 @@
         pushupData.push(todayEntry);
       }
 
-      // Write to Firestore
-      await db
-        .collection('users')
-        .doc(user.uid)
-        .collection('pushups')
-        .doc(today)
-        .set({
-          totalPushups: todayEntry.totalPushups
-        });
+      const docRef = doc(db, 'users', user.uid, 'pushups', today);
+      await setDoc(docRef, {
+        totalPushups: todayEntry.totalPushups
+      });
 
       updateUI();
     }
 
-    // 3) Update UI with fresh data
+    // Update UI
     function updateUI() {
-      // Today's total
       const today = getTodayString();
       const todayEntry = pushupData.find(e => e.date === today);
-      const todayTotal = todayEntry ? todayEntry.totalPushups : 0;
-      todayTotalEl.textContent = todayTotal;
+      todayTotalEl.textContent = todayEntry ? todayEntry.totalPushups : 0;
 
-      // Streak
-      const streak = calculateStreak();
-      currentStreakEl.textContent = streak;
-
-      // History
+      currentStreakEl.textContent = calculateStreak();
       updateHistoryList();
     }
 
-    // 4) Build or rebuild the history list with Edit buttons
+    // Build or rebuild the history list
     function updateHistoryList() {
       const sortedData = [...pushupData].sort((a, b) => new Date(b.date) - new Date(a.date));
       historyList.innerHTML = '';
 
       sortedData.forEach(entry => {
         const li = document.createElement('li');
-        li.innerHTML = `
-          <span>${entry.date}: ${entry.totalPushups} pushups</span>
-        `;
-        // Create edit button
+        li.innerHTML = `<span>${entry.date}: ${entry.totalPushups} pushups</span>`;
+
+        // Edit Button
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
         editBtn.classList.add('edit-btn');
@@ -348,33 +349,27 @@
           if (newTotalStr !== null) {
             const newTotal = parseInt(newTotalStr, 10);
             if (!isNaN(newTotal) && newTotal >= 0) {
-              // Update local array
               entry.totalPushups = newTotal;
-              // Update Firestore
+
               const user = auth.currentUser;
-              await db
-                .collection('users')
-                .doc(user.uid)
-                .collection('pushups')
-                .doc(entry.date)
-                .set({
-                  totalPushups: newTotal
-                });
+              const docRef = doc(db, 'users', user.uid, 'pushups', entry.date);
+              await setDoc(docRef, {
+                totalPushups: newTotal
+              });
+
               updateUI();
             } else {
               alert("Invalid input. Please enter a non-negative number.");
             }
           }
         });
-
         li.appendChild(editBtn);
         historyList.appendChild(li);
       });
     }
 
-    // 5) Calculate streak from pushupData
+    // Calculate consecutive-day streak
     function calculateStreak() {
-      // Sort ascending
       const sortedData = [...pushupData].sort((a, b) => new Date(a.date) - new Date(b.date));
       let streak = 0;
       let prevDate = null;
@@ -400,7 +395,7 @@
       return streak;
     }
 
-    // 6) Return today's date (YYYY-MM-DD)
+    // Utility: get today's date as YYYY-MM-DD
     function getTodayString() {
       const now = new Date();
       const y = now.getFullYear();
@@ -409,7 +404,7 @@
       return `${y}-${m}-${d}`;
     }
 
-    // Utility: show/hide auth message
+    // Utility: show/hide auth error message
     function setAuthMessage(msg) {
       authMessage.textContent = msg;
     }
@@ -417,7 +412,8 @@
       authMessage.textContent = '';
     }
 
-    console.log("Boris: 'Cross-device synergy engaged! I am truly invincible!'");
+    console.log("Boris says: 'Cross-device synergy engaged! I remain invincible!'");
   </script>
+
 </body>
 </html>
