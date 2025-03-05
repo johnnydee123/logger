@@ -186,7 +186,8 @@
       setDoc,
       getDoc,
       collection,
-      getDocs
+      getDocs,
+      addDoc
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
     // 2) Your web app's Firebase configuration
@@ -310,6 +311,11 @@
     async function logPushups(pushups) {
       const user = auth.currentUser;
       if (!user) return;
+      
+      await addDoc(collection(db, 'users', user.uid, 'pushupEntries'), {
+        pushups: pushups,
+        date: new Date().toISOString()
+      });
 
       const today = getTodayString();
       let todayEntry = pushupData.find(e => e.date === today);
