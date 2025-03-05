@@ -155,13 +155,12 @@
     </div>
   </div>
 
-<!--  Insret BOTTOM of page Note/MESSAGE HERE
   <div class="footer-note">
-    <em>*Note:</em> Using Firebase modules for a simple app. Use the same account on multiple devices for real-time sync. 
+    <em>*Note:</em> vers. 0.0.0.1 
     <br><br>
-    “I am invincible!” – Boris, probably
+    
   </div>
--->
+
   <!-- 
     COPY AND PASTE YOUR PROVIDED SCRIPTS
     (PLUS FIREBASE AUTH & FIRESTORE IMPORTS)
@@ -309,35 +308,31 @@
     });
 
     async function logPushups(pushups) {
-        const user = auth.currentUser;
-        if (!user) return;
-        
-        try {
-            await addDoc(collection(db, 'users', user.uid, 'pushupEntries'), {
-                pushups: pushups,
-                date: new Date().toISOString()
-            });
+      const user = auth.currentUser;
+      if (!user) return;
     
-            const today = getTodayString();
-            let todayEntry = pushupData.find(e => e.date === today);
+      // 1) AddDoc to record each entry
+      await addDoc(collection(db, 'users', user.uid, 'pushupEntries'), {
+        pushups: pushups,
+        date: new Date().toISOString()
+      });
     
-            if (todayEntry) {
-                todayEntry.totalPushups += pushups;
-            } else {
-                todayEntry = { date: today, totalPushups: pushups };
-                pushupData.push(todayEntry);
-            }
+      // 2) Still update the per-day total
+      const today = getTodayString();
+      let todayEntry = pushupData.find(e => e.date === today);
     
-            const docRef = doc(db, 'users', user.uid, 'pushups', today);
-            await setDoc(docRef, {
-                totalPushups: todayEntry.totalPushups
-            });
+      if (todayEntry) {
+        todayEntry.totalPushups += pushups;
+      } else {
+        todayEntry = { date: today, totalPushups: pushups };
+        pushupData.push(todayEntry);
+      }
     
-            updateUI();
-        } catch (error) {
-            console.error("Error logging pushups: ", error);
-        }
-    }
+      const docRef = doc(db, 'users', user.uid, 'pushups', today);
+      await setDoc(docRef, { totalPushups: todayEntry.totalPushups });
+    
+      updateUI();
+  }
 
     // Update UI
     function updateUI() {
