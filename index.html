@@ -156,7 +156,7 @@
   </div>
 
   <div class="footer-note">
-    <em></em> vers. 0.0.0.2 
+    <em></em> vers. 0.0.0.3 
     <br><br>
     
   </div>
@@ -310,13 +310,7 @@
       const user = auth.currentUser;
       if (!user) return;
     
-      // 1) AddDoc to record each entry
-      await addDoc(collection(db, 'users', user.uid, 'pushupEntries'), {
-        pushups: pushups,
-        date: new Date().toISOString()
-      });
-    
-      // 2) Still update the per-day total
+      // update the per-day total
       const today = getTodayString();
       let todayEntry = pushupData.find(e => e.date === today);
     
