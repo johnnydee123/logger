@@ -310,30 +310,22 @@
     async function logPushups(pushups) {
       const user = auth.currentUser;
       if (!user) return;
-  
+
       const today = getTodayString();
       let todayEntry = pushupData.find(e => e.date === today);
-  
+
       if (todayEntry) {
-          todayEntry.totalPushups += pushups;
+        todayEntry.totalPushups += pushups;
       } else {
-          todayEntry = { date: today, totalPushups: pushups };
-          pushupData.push(todayEntry);
+        todayEntry = { date: today, totalPushups: pushups };
+        pushupData.push(todayEntry);
       }
-  
-      // Create a new entry for each log
-      const logEntry = {
-          date: new Date().toISOString(),
-          pushups: pushups
-      };
-      const docRef = doc(collection(db, 'users', user.uid, 'pushups', today, 'logs'));
-      await setDoc(docRef, logEntry);
-      
-      const totalDocRef = doc(db, 'users', user.uid, 'pushups', today);
-      await setDoc(totalDocRef, {
-          totalPushups: todayEntry.totalPushups
+
+      const docRef = doc(db, 'users', user.uid, 'pushups', today);
+      await setDoc(docRef, {
+        totalPushups: todayEntry.totalPushups
       });
-  
+
       updateUI();
     }
 
