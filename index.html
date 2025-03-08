@@ -201,7 +201,11 @@
       doc,
       setDoc,
       getDoc,
+      updateDoc,
       collection,
+      addDoc,
+      serverTimestamp,
+      increament,
       getDocs
     } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
@@ -326,24 +330,29 @@
     async function logPushups(pushups) {
       const user = auth.currentUser;
       if (!user) return;
-    
-      // update the per-day total
-      const today = getTodayString();
-      let todayEntry = pushupData.find(e => e.date === today);
-    
-      if (todayEntry) {
-        todayEntry.totalPushups += pushups;
-      } else {
-        todayEntry = { date: today, totalPushups: pushups };
-        pushupData.push(todayEntry);
-      }
-    
-      const docRef = doc(db, 'users', user.uid, 'pushups', today);
-      await setDoc(docRef, { totalPushups: todayEntry.totalPushups });
-    
-      updateUI();
-  }
 
+      // 1) Create an "entries" sub-collection doc for each individual log.
+      const today = getTodayString();
+      const dayEntriesRef = collection(db, 'users', user.uid, 'pushups', today, 'entries');
+      await addDoc(dayEntriesRef, {
+      pushups,
+      timestamp: serverTimestamp() // you can store a timestamp
+      });
+      
+      // 2) Increment the day’s total in the main "pushups/today" doc.
+      //    This ensures your existing code that calls loadPushupData() and display
+      //    still shows the correct daily total (no visual changes needed).
+      const dayDocRef = doc(db, 'users', user.uid, 'pushups', today);
+      // If the doc doesn’t exist yet, setDoc + increment() with merge:true will create it
+      await setDoc(dayDocRef, {
+        totalPushups: increment(pushups)
+      }, { merge: true });
+    
+      // 3) Reload data & update UI:
+      await loadPushupData();
+      updateUI();
+    }
+  
     // Update UI
     function updateUI() {
       const today = getTodayString();
