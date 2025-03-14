@@ -109,6 +109,9 @@
       min-height: 20px;
     }
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
 
@@ -154,6 +157,14 @@
       <h2>History</h2>
       <ul id="historyList"></ul>
     </div>
+
+
+    <!-- 7-Day Total Chart -->
+    <h2>7-Day Total Over Time</h2>
+    <div style="max-width: 600px; margin-top: 20px;">
+      <canvas id="sevenDayChart"></canvas>
+    </div>
+
 
     <div class="badges">
       <h2>Badges</h2>
@@ -372,6 +383,11 @@
     
       // Rebuild the history
       updateHistoryList();
+
+      // New: Update the 7-day rolling total chart
+      updateSevenDayChart();
+    }  
+
     }
 
 
@@ -488,7 +504,90 @@
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
+    }
+
+    
+    // Global chart reference (so we can update/destroy it as needed)
+    let sevenDayChartInstance = null;
+    
+    /**
+     * Build and render (or update) the 7-day total pushups chart
+     */
+    function updateSevenDayChart() {
+      const ctx = document.getElementById('sevenDayChart').getContext('2d');
+    
+      // If a chart already exists, destroy it before creating a new one
+      if (sevenDayChartInstance) {
+        sevenDayChartInstance.destroy();
+      }
+    
+      // Sort by date ascending
+      const sortedData = [...pushupData].sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+    
+      // Prepare labels (dates) and data (7-day sums)
+      const labels = [];
+      const dataPoints = [];
+    
+      for (let i = 0; i < sortedData.length; i++) {
+        const currentDate = sortedData[i].date;
+        // For each date, compute the rolling 7-day total
+        const rollingSum = getSevenDayTotalOnDate(currentDate);
+        labels.push(currentDate);
+        dataPoints.push(rollingSum);
+      }
+    
+      // Build chart
+      sevenDayChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Rolling 7-Day Total',
+            data: dataPoints
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Pushups' }
+            },
+            x: {
+              title: { display: true, text: 'Date' }
+            }
+          }
+        }
+      });
+    }
+    
+    /**
+     * Compute the rolling 7-day total for a specific date,
+     * by summing that date plus the previous 6 days.
+     */
+    function getSevenDayTotalOnDate(dateStr) {
+      let sum = 0;
+      const dateObj = new Date(dateStr);
+    
+      for (let i = 0; i < 7; i++) {
+        // Create new date offset by i days behind dateStr
+        const checkDate = new Date(dateObj);
+        checkDate.setDate(checkDate.getDate() - i);
+    
+        const year = checkDate.getFullYear();
+        const month = String(checkDate.getMonth() + 1).padStart(2, '0');
+        const day = String(checkDate.getDate()).padStart(2, '0');
+        const checkDateStr = `${year}-${month}-${day}`;
+    
+        const entry = pushupData.find(e => e.date === checkDateStr);
+        if (entry) sum += entry.totalPushups;
+      }
+    
+      return sum;
+    }
 
     
     console.log("Boris says: 'Cross-device synergy engaged! I remain invincible!'");
